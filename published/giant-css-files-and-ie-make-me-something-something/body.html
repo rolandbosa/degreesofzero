@@ -1,0 +1,158 @@
+<p>Go crazy? Well, maybe not..</p>
+
+<preview>
+	<p>I had another fun encounter with Internet Explorer this week. Apparently <a href="http://blogs.msdn.com/b/ieinternals/archive/2011/05/14/internet-explorer-stylesheet-rule-selector-import-sheet-limit-maximum.aspx">IE (6-9) enforces a hard limit for the number of CSS rules that it will accept in a single style sheet.</a> Yup, you read that correctly. Just when I started to forget how much I disliked IE, it goes and proves to me once again just how worthy of my disdain it truly is.</p>
+</preview>
+
+<p> I also feel the need to mention that the <i>only</i> browser that had this problem was IE. But, anyways.. I&#39;m not bitter.</p>
+
+<h3>How on Earth Do You End Up With 4095+ CSS Rules?</h3>
+<p>Now, I feel I should start with a little back story to get you up to speed with how I got here. So, I&#39;ve been using an application called <a href="https://github.com/coolwanglu/pdf2htmlEX">pdf2htmlEX</a> to convert gigantic PDF files (500MB+, 700+ pages) to HTML. To get the HTML to look almost exactly like the original PDF, the application uses a lot of absolute positioning of text; sometimes even individual letters are positioned absolutely by themselves. Needless to say, this leads to quite a lot of CSS rules. All in all, after converting one of these giant PDF files, I ended up with a style sheet with almost 12,000 CSS rules.</p>
+
+<p>Before I went crazy with writing some code to chop up my giant CSS files into something IE will digest, I decided to test to make sure this was actually the problem. Using my IDE, I manually chopped up the CSS file into chunks of no more than 4095 rules each. Sure enough once I did this, IE decided it would render everything just fine. Amazing.</p>
+
+<h3>Great, Now What to Do About It?</h3>
+<p>Now that I knew for sure what the problem was, and how to fix it, I just had to code it. Here&#39;s a mini-library for CodeIgniter that I used to remedy this situation:</p>
+<pre class="code php">&lt;?php  if ( ! defined(&#039;BASEPATH&#039;)) exit(&#039;No direct script access allowed&#039;);
+
+class Css
+{
+
+	/*
+		Chop up the given CSS into chunks with no more than the given # of rules each.
+	*/
+	public function chop($css, $max_num_rules)
+	{
+		$chunks = array();
+
+		$offset = 0;
+
+		/*
+			Find all the rules in the given CSS.
+		*/
+		while (
+			preg_match_all(&#039;~\{[^\{\}]+\}~&#039;, $css, $matches, PREG_OFFSET_CAPTURE, $offset) &gt; 0 &amp;&amp;
+			isset($matches[0][$max_num_rules])
+		)
+		{
+			$pos1 = $matches[0][$max_num_rules - 1][1] + strlen($matches[0][$max_num_rules - 1][0]);
+			$pos2 = $matches[0][$max_num_rules][1];
+
+			$chunks[] = substr($css, $offset, $pos1 - $offset);
+
+			$offset = $pos1;
+		}
+
+		// The left-overs.
+		$chunks[] = substr($css, $offset);
+
+		if (count($chunks) &gt; 1)
+			// We may have broken media queries in the CSS, let&#039;s fix them.
+			$chunks = $this-&gt;fix_broken_media_queries($chunks);
+
+		return $chunks;
+	}
+
+	/*
+		Looks for and closes any open media queries in the given CSS.
+	*/
+	protected function fix_broken_media_queries($chunks)
+	{
+		$open_media_queries = array();
+
+		foreach ($chunks as $i =&gt; $css)
+		{
+			if (count($open_media_queries) &gt; 0)
+				foreach ($open_media_queries as $media_query)
+					$css = $media_query . $css;
+
+			$n = 0;
+			$offset = 0;
+
+			while (preg_match(&#039;~@media [^\{]+\{~&#039;, $css, $matches, PREG_OFFSET_CAPTURE, $offset) === 1)
+			{
+				// Add to the array of open media queries.
+				$open_media_queries[$n] = $matches[0][0];
+
+				/*
+					Set &#039;pos1&#039; to just after the media query declaration.
+				*/
+				$pos1 = $matches[0][1] + strlen($matches[0][0]);
+
+				$offset = $pos1;
+
+				// Get the closing bracket of the media query.
+				if (($pos2 = $this-&gt;find_next_closing_bracket($css, $offset)) !== false)
+				{
+					// Found it!
+
+					$offset = ($pos2 + 1);
+
+					// Remove this media query from the array of open media queries.
+					if (isset($open_media_queries[$n]))
+						unset($open_media_queries[$n]);
+				}
+				else
+				{
+					// Couldn&#039;t find the closing bracket for this media query.
+
+					// Close the open media query for this chunk.
+					$css .= &#039;}&#039;;
+				}
+				
+				$n++;
+			}
+
+			$chunks[$i] = $css;
+		}
+
+		return $chunks;
+	}
+
+	/*
+		Finds the next closing bracket in the given CSS, starting at the given offset.
+	*/
+	protected function find_next_closing_bracket($css, &amp;$offset)
+	{
+		while (
+			($pos2 = strpos($css, &#039;}&#039;, $offset)) !== false &amp;&amp;
+			($pos3 = strpos($css, &#039;{&#039;, $offset)) !== false &amp;&amp;
+			$pos3 &lt; $pos2
+		)
+			$offset = ($pos2 + 1);
+
+		return $pos2;
+	}
+
+}
+
+
+/* End of file Css.php */
+/* Location: ./application/libraries/Css.php */</pre>
+
+<p>And an example of the fix in action:</p>
+<pre class="code php">&lt;?php if ( ! defined(&#039;BASEPATH&#039;)) exit(&#039;No direct script access allowed&#039;);
+
+class Test extends CI_Controller
+{
+
+    function __construct()
+    {
+        parent::__construct();
+    }
+
+    public function index()
+    {
+        $this-&gt;load-&gt;library(&#039;Css&#039;);
+
+        $chunks = $this-&gt;css-&gt;chop($css, 4095);
+
+        foreach ($chunks as $i =&gt; $chunk)
+        {
+            $file = &#039;/file/path/to/css/directory/chunk-&#039; . ($i + 1) . &#039;.css&#039;;
+
+            file_put_contents($file, $chunk);
+        }
+    }
+    
+}</pre>

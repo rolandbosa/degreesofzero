@@ -1,0 +1,199 @@
+<preview>
+<p>Just like with any new skill, learning how to test takes time. For the longest time, I didn't do any automated testing. And, after trying my hand at <a href="https://en.wikipedia.org/wiki/Test-driven_development">test-driven development</a> the last few months, I don't know what took me so long to get into it. I feel less stressed and more confident in the software I write. It takes time and discipline, but the benefits are well worth it.</p>
+
+<p><a href="http://nodejs.org/">Node.js</a> has a lot of tools available for automated testing. Depending on what kind of testing you want to do, there is most likely already something available designed specifically for that purpose. In this post, I'll walk you through an example of unit testing and integration testing in Node.</p>
+</preview>
+
+<h3>Unit Testing</h3>
+
+<p>For the uninitiated, unit tests should be narrowly focused on individual components of an application. For example, if you wanted to test the inputs and outputs of a single method on a class, you'd write a unit test for that. Usually you'll end up with multiple unit tests covering a variety of scenarios for each method of a class.</p>
+
+<p>Since I learn best from examples, I'll use one here to illustrate how unit tests work. The following is a set of unit tests from <a href="https://github.com/chill117/sequel/blob/master/test/unit/instance/get.js">a real project</a>:</p>
+
+<pre class="code js">
+var chai = require('chai')
+var expect = chai.expect
+
+var sequel = require('sequel')
+
+describe('Instance#', function() {
+
+	var model
+
+	before(function() {
+
+		model = sequel.define('InstanceGetTest', {
+
+			id: {
+				type: 'integer',
+				autoIncrement: true,
+				primaryKey: true
+			},
+			name: 'text',
+			description: 'text',
+			num_something: 'integer'
+
+		}, {
+
+			tableName: 'does_not_exist'
+
+		})
+
+	})
+
+	describe('get(name)', function() {
+
+		it('should return the value for a single field', function() {
+
+			var data = {
+				id: 1,
+				name: 'Some thing',
+				description: 'A description of some thing',
+				num_something: 10
+			}
+
+			var instance = model.build(data)
+
+			for (var field in data)
+				expect(instance.get(field)).to.equal(data[field])
+
+		})
+
+	})
+
+	describe('get()', function() {
+
+		it('should return all data', function() {
+
+			var data = {
+				id: 2,
+				name: 'Another thing',
+				description: 'A description of another thing',
+				num_something: 2
+			}
+
+			var instance = model.build(data)
+
+			expect(instance.get()).to.deep.equal(data)
+
+		})
+
+	})
+
+})
+</pre>
+
+<p>The above code is to be executed by <a href="http://visionmedia.github.io/mocha/">Mocha</a>, and uses the <a href="http://chaijs.com/">Chai</a> assertion library. I prefer <a href="http://chaijs.com/guide/styles/#expect">Expect</a>-style assertions, but you can <a href="http://chaijs.com/guide/styles/">choose</a> whichever you prefer.</p>
+
+<p>For my setup, I have Mocha <a href="http://visionmedia.github.io/mocha/#installation">installed globally</a> so that I can run the above test from terminal like this:</p>
+<pre class="code">mocha test/unit/instance/get</pre>
+
+<p>So what is happening in the test above? Well, first we need to make <span class="code">chai</span> and <span class="code">expect</span> available to our code:</p>
+<pre class="code js">
+var chai = require('chai')
+var expect = chai.expect
+</pre>
+
+<p>Then we use Mocha's <span class="code">describe()</span> to add a description to a block of test code:</p>
+<pre class="code js">
+describe('Instance#', function() {
+
+	describe('get(name)', function() {
+
+		it('should return the value for a single field', function() {
+
+			// Test code here..
+
+		})
+
+	})
+
+})
+</pre>
+<p>Note that you can nest any number of calls to <span class="code">describe()</span>. The description text will be concatenated together and prepended to the description of each test from the call to <span class="code">it()</span> to form the full test description.</p>
+
+<p>Basically, this provides a human-friendly name to each test that is executed. So, if the test above were to fail, Mocha would spit out something like this:</p>
+<pre class="code">
+  0 passing (8ms)
+  1 failing
+
+  1) Instance# get(name) should return the value for a single field:
+</pre>
+
+<p>If you hadn't already guessed, the <span class="code">it()</span> method wraps the code for an individual test. With Mocha, it is possible to designate a test as <a href="http://visionmedia.github.io/mocha/#synchronous-code">synchronous</a> or <a href="http://visionmedia.github.io/mocha/#asynchronous-code">asynchronous</a>. I won't get into all that here, because I think Mocha's documentation does a fair job of explaining those details.</p>
+
+<p>For more complex tests, where it is important that certain conditions exist prior to the execution of a test, Mocha provides &quot;hooks&quot;: <span class="code">before()</span>, <span class="code">after()</span>, <span class="code">beforeEach()</span>, <span class="code">afterEach()</span>. These hook methods allow synchronous or asynchronous code execution before all tests, after all tests, before each test, and after each test respectively. In the example from earlier, the <span class="code">before()</span> will define the <span class="code">model</span> variable before the tests are executed.
+
+
+<h3>Integration Testing</h3>
+
+<p>Slightly different from unit tests, integration tests are focused on the interactions between systems. For example, between a client and an API or web service, or between applications on the same machine. Integration tests are also usually more complicated than unit tests. Here's an example of an integration test:</p>
+<pre class="code js">
+var http = require('http')
+var querystring = require('querystring')
+
+describe('POST /api/login', function() {
+
+	it('should return an error when a required field is empty', function(done) {
+
+		// This is the data we will be sending to the server in an HTTP POST request.
+		var postData = querystring.stringify({
+			username: 'test_testerson',
+			password: ''// Leave password blank
+		})
+
+		// Headers, for the server to properly handle the data.
+		var headers = {
+			'Content-Type': 'application/x-www-form-urlencoded',
+			'Content-Length': postData.length
+		}
+
+		// Options for the http.request() method.
+		var options = {
+			hostname: 'localhost',
+			port: 3000,
+			path: '/api/login',
+			method: 'POST',
+			headers: headers
+		}
+
+		var req = http.request(options, function(res) {
+
+			// We are expecting an error status code in the response.
+			if (res.statusCode != 400)
+				// We call done() with an error to signify that the test failed.
+				return done(new Error('Expected HTTP status code 400'))
+
+			// Calling done() with no errors signifies the test passed.
+			done()
+
+		})
+
+		// Listen for unexpected errors from the request.
+		req.once('error', function(e) {
+
+			// We call done() with an error to signify that the test failed.
+			done(new Error('Problem with request: ' + e.message))
+
+		})
+
+		// Sending the data to the server.
+		req.write(postData)
+
+		// Closing the request.
+		req.end()
+
+	})
+
+})
+</pre>
+<p>This particular example would test that the login attempt fails when missing the password field. There are many more possible scenarios that you would want to test for a login form, but this gives you an idea of how an integration test works. The <a href="http://nodejs.org/api/http.html">http module</a> used here is a core module of Node. With it you can perform all kinds of HTTP requests.</p>
+
+
+<h3>Keep it Simple</h3>
+
+<p>Critical to maintaining one's sanity when writing and debugging tests is to ensure that tests are isolated from one another. What happens in one test should not affect another. You might not be testing what you think you're testing. Not isolating tests has caused me more stress and time than I care to admit, but it happens.</p>
+
+<p>I've found that one of the best ways to achieve this is to split up tests that are longer than 100 lines of code. That's probably the maximum length of a test before it just gets too complicated.</p>
+
+<p>Well, I've run out of things to say for now. Happy noding!</p>

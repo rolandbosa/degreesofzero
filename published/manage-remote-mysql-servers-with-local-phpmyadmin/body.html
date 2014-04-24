@@ -1,0 +1,67 @@
+<preview>
+
+	<p>Have you ever needed to manage your remote MySQL databases, and ended up settling on the less-than-ideal setup of having an instance of phpMyAdmin on the same server as the MySQL server? Well, I am about to make your day. I am going to show you how to manage any number of remote MySQL databases from your local instance of phpMyAdmin; without compromising on security.</p>
+
+	<p>This tutorial assumes you've already got phpMyAdmin up and running locally. If you need help with that, there are <a href="https://duckduckgo.com/?q=how+to+install+phpmyadmin">plenty of articles floating around</a> to guide you.</p>
+
+</preview>
+
+	<h3>SSH Tunnel</h3>
+	<p>It is not absolutely necessary, but I suggest setting up <a href="/article/passwordless-ssh-on-linux.html">Passwordless SSH</a> between your local machine and the remote server. This will allow you to run the SSH tunnel as a background process.</p>
+	<p>We will be using SSH to set up a connection to our remote host, through which all requests to a specific port locally will be forwarded to a specific port on the remote machine. This is where the magic happens:</p>
+	<pre class="code">ssh -fNL 3307:localhost:3306 root@REMOTE_HOST</pre>
+	<p><i>Replace <b>REMOTE_HOST</b> with the IP address (or host name) of the remote server.</i></p>
+
+	<p>Let's break that command down a bit:</p>
+	<ul>
+		<li><b>-f</b> Requests ssh to go to background just before command execution. Useful for having the SSH tunnel run in the background. If you are using a password to connect to the remote server, you'll want to remove this argument.</li>
+		<li><b>-N</b> Do not execute a remote command. This is useful for just forwarding ports.</li>
+		<li><b>-L</b> Specifies that the given port on the local (client) host is to be forwarded to the given host and port on the remote side.</li>
+	</ul>
+
+	<p>To verify that the SSH tunnel was started successfully, run the following command:</p>
+	<pre class="code">ps aux | grep ssh</pre>
+	<p>You should see the ssh command you entered earlier in this list of processes.</p>
+
+
+	<h3>Configure phpMyAdmin</h3>
+	<p>Now that we've got the SSH tunnel running in the background, we can configure phpMyAdmin to connect to the remote machine over the tunnel. Edit the following configuration file:</p>
+	<pre class="code">sudo vim /etc/phpmyadmin/config.inc.php</pre>
+	<p>Add the following to the end of the file:</p>
+	<pre class="code php"># Add the following after all the existing server configurations:
+$cfg['Servers'][$i]['verbose']       = 'Local';
+$cfg['Servers'][$i]['host']          = 'localhost';
+$cfg['Servers'][$i]['port']          = '3306';
+$cfg['Servers'][$i]['connect_type']  = 'tcp';
+$cfg['Servers'][$i]['extension']     = 'mysqli';
+$cfg['Servers'][$i]['compress']      = FALSE;
+$cfg['Servers'][$i]['auth_type']     = 'cookie';
+$i++;
+
+$cfg['Servers'][$i]['verbose']       = 'Remote Server 1';// Change this to whatever you like.
+$cfg['Servers'][$i]['host']          = '127.0.0.1';
+$cfg['Servers'][$i]['port']          = '3307';
+$cfg['Servers'][$i]['connect_type']  = 'tcp';
+$cfg['Servers'][$i]['extension']     = 'mysqli';
+$cfg['Servers'][$i]['compress']      = FALSE;
+$cfg['Servers'][$i]['auth_type']     = 'cookie';
+$i++;</pre>
+	<p>Save the file. Now, open up your browser and point it at your local phpMyAdmin instance. If you modified the phpMyAdmin config file correctly, you should now see a select drop down at the login screen. This will list both of the servers: &quot;Local&quot; and &quot;Remote Server 1&quot;. You can add any number of servers to phpMyAdmin in this way.</p>
+
+	<p>Now, finally, the moment of truth. Try logging in with a valid MySQL user on your remote server. If all is well, you should be logged in to the account and should see all the databases to which that user has access.</p>
+
+	<h3>Start SSH Tunnel at Boot Up</h3>
+	<p>If you are feeling extra fancy, you may want to start the SSH tunnel every time your local machine boots up. To do this, you'll need to put the command from earlier into a separate file that will be executed sometime during boot up:</p>
+	<pre class="code">mkdir ~/scripts
+vim ~/scripts/ssh-tunnel.sh</pre>
+
+	<p>Add the command from earlier to this new bash script file:</p>
+	<pre class="code">#!/bin/bash
+
+ssh -fNL 3307:localhost:3306 root@REMOTE_HOST</pre>
+
+	<p>Now make sure the file is executable:</p>
+	<pre class="code">chmod 0100 ~/scripts/ssh-tunnel.sh</pre>
+
+	<p>And, finally add the script to the boot order:</p>
+	<pre class="code">sudo ln -s ~/scripts/ssh-tunnel.sh /etc/rc2.d/S98-ssh-tunnel</pre>

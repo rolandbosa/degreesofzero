@@ -1,0 +1,188 @@
+<p>I recently I needed to organize the controllers of a CodeIgniter instance into sub-sub folders. By default, CodeIgniter only allows routing to sub folders in the controller directory:</p>
+
+<pre class="code">application
+-- controllers
+---- api
+------ users.php
+------ items.php
+---- welcome.php</pre>
+<p>With the above structure, you'd access your welcome controller at the following URI:</p><pre class="code">/welcome</pre>
+<p>And, you'd access the users API controller at this URI:</p>
+<pre class="code">/api/users</pre>
+<p>The problem comes when you want to have a deeper controllers directory structure:</p>
+<pre class="code">application
+-- controllers
+---- admin
+------ api
+-------- users.php
+-------- items.php
+------ home.php
+------ shop.php
+---- shop
+------ api
+-------- cart.php
+------ catalog.php
+---- blog
+------ api
+-------- article.php
+-------- comments.php
+------ home.php</pre>
+
+<p>By default, CodeIgniter will not route requests for the following URIs correctly:</p>
+<pre class="code">/admin/api/item
+/shop/api/cart
+/blog/api/comments</pre>
+
+<h3>How to Make it Work</h3>
+
+<p>First, if you have not already, you'll need to add <span class="code">mod_rewrite</span> rules to your site's webroot to allow the routing of requests to your CodeIgniter's index.php file:</p>
+<pre class="code">
+&lt;IfModule mod_rewrite.c&gt;
+
+  Options +FollowSymLinks
+  RewriteEngine On
+  RewriteBase /
+
+  # If your default controller is something other than 'welcome' you should probably change this.
+  RewriteRule ^(welcome(/index)?|index(\.php)?)/?$ / [L,R=301]
+  RewriteRule ^(.*)/index/?$ $1 [L,R=301]
+
+  RewriteCond %{REQUEST_FILENAME} !-d
+  RewriteCond %{REQUEST_FILENAME} !-f
+  RewriteRule ^(.*)$ /index.php/$1 [L]
+
+  SetEnvIfNoCase X-Forwarded-For .+ proxy=yes
+  SetEnvIfNoCase X-moz prefetch no_access=yes
+   
+  # Block pre-fetch requests with X-moz headers.
+  RewriteCond %{ENV:no_access} yes
+  RewriteRule .* - [F,L]
+
+  # Fix for infinite redirect loops.
+  RewriteCond %{ENV:REDIRECT_STATUS} 200
+  RewriteRule .* - [L]
+
+&lt;/IfModule&gt;
+</pre>
+<p>The above rules tell Apache to internally route all requests through the index.php file, but only for requests that do not match an existing file or directory. Once you've got rewrite rules in place and working, you can move on to the sub-sub-folder magic.</p>
+
+<h4>The Magic</h4>
+<p>You will need to extend the core Router class of CodeIgniter. All you have to do is add one file, <span class="code">application/core/MY_Router.php</span>:</p>
+<pre class="code php">&lt;?php  if ( ! defined(&#039;BASEPATH&#039;)) exit(&#039;No direct script access allowed&#039;);
+
+/*
+	Extended the core Router class to allow for sub-sub-folders in the controllers directory.
+*/
+class MY_Router extends CI_Router {
+
+	function __construct()
+	{
+		parent::__construct();
+	}
+
+	function _validate_request($segments)
+	{
+		if (count($segments) == 0)
+		{
+			return $segments;
+		}
+
+		// Does the requested controller exist in the root folder?
+		if (file_exists(APPPATH.&#039;controllers/&#039;.$segments[0].&#039;.php&#039;))
+		{
+			return $segments;
+		}
+
+		// Is the controller in a sub-folder?
+		if (is_dir(APPPATH.&#039;controllers/&#039;.$segments[0]))
+		{
+			// Set the directory and remove it from the segment array
+			$this-&gt;set_directory($segments[0]);
+			$segments = array_slice($segments, 1);
+
+			while (count($segments) &gt; 0 &amp;&amp; is_dir(APPPATH.&#039;controllers/&#039;.$this-&gt;directory.$segments[0]))
+			{
+				// Set the directory and remove it from the segment array
+				$this-&gt;set_directory($this-&gt;directory . $segments[0]);
+				$segments = array_slice($segments, 1);
+			}
+
+			if (count($segments) &gt; 0)
+			{
+				// Does the requested controller exist in the sub-folder?
+				if ( ! file_exists(APPPATH.&#039;controllers/&#039;.$this-&gt;fetch_directory().$segments[0].&#039;.php&#039;))
+				{
+					if ( ! empty($this-&gt;routes[&#039;404_override&#039;]))
+					{
+						$x = explode(&#039;/&#039;, $this-&gt;routes[&#039;404_override&#039;]);
+
+						$this-&gt;set_directory(&#039;&#039;);
+						$this-&gt;set_class($x[0]);
+						$this-&gt;set_method(isset($x[1]) ? $x[1] : &#039;index&#039;);
+
+						return $x;
+					}
+					else
+					{
+						show_404($this-&gt;fetch_directory().$segments[0]);
+					}
+				}
+			}
+			else
+			{
+				// Is the method being specified in the route?
+				if (strpos($this-&gt;default_controller, &#039;/&#039;) !== FALSE)
+				{
+					$x = explode(&#039;/&#039;, $this-&gt;default_controller);
+
+					$this-&gt;set_class($x[0]);
+					$this-&gt;set_method($x[1]);
+				}
+				else
+				{
+					$this-&gt;set_class($this-&gt;default_controller);
+					$this-&gt;set_method(&#039;index&#039;);
+				}
+
+				// Does the default controller exist in the sub-folder?
+				if ( ! file_exists(APPPATH.&#039;controllers/&#039;.$this-&gt;fetch_directory().$this-&gt;default_controller.&#039;.php&#039;))
+				{
+					$this-&gt;directory = &#039;&#039;;
+					return array();
+				}
+
+			}
+
+			return $segments;
+		}
+
+
+		// If we&#039;ve gotten this far it means that the URI does not correlate to a valid
+		// controller class.  We will now see if there is an override
+		if ( ! empty($this-&gt;routes[&#039;404_override&#039;]))
+		{
+			$x = explode(&#039;/&#039;, $this-&gt;routes[&#039;404_override&#039;]);
+
+			$this-&gt;set_class($x[0]);
+			$this-&gt;set_method(isset($x[1]) ? $x[1] : &#039;index&#039;);
+
+			return $x;
+		}
+
+
+		// Nothing else to do at this point but show a 404
+		show_404($segments[0]);
+	}
+
+	function set_directory($dir)
+	{
+		// Allow forward slash, but don&#039;t allow periods.
+		$this-&gt;directory = str_replace(&#039;.&#039;, &#039;&#039;, $dir).&#039;/&#039;;
+	}
+
+}
+
+/* End of file MY_Router.php */
+/* Location: ./application/core/MY_Router.php */</pre>
+
+<p>That's it! CodeIgniter will automatically include this file and instantiate the class within. You should now be able to organize your controllers into as many sub folders, sub sub folders, sub sub sub folders as you like.</p>

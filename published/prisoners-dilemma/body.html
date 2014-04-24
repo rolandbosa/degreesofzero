@@ -1,0 +1,162 @@
+<preview>
+	<p>If you&#39;re not familiar with the <a href="http://en.wikipedia.org/wiki/Prisoner&#39;s_dilemma">The Prisoner&#39;s Dilemma</a>, it&#39;s the go-to example for describing <a href="http://en.wikipedia.org/wiki/Game_theory">game theory</a>. Here&#39;s a quick explanation of how it works:</p><p>Two individuals are each presented with a choice between two options: to <i>Defect</i> or to <i>Cooperate</i>.</p><p><strong>Defecting</strong> means an individual will betray the other in order to receive a beneficial outcome for them self and a negative outcome for the other.</p><p><strong>Cooperating</strong> means an individual is hoping the other individual will choose to cooperate as well, in which case they would both get a slightly beneficial outcome.</p><p>Neither will know what choice the other has made until after they have both made a decision.</p><p>If you were to play this scenario out only once, the best course of action for either individual would be to <i>defect</i>. However, that&#39;s not all that interesting. What&#39;s more interesting is when this scenario is played out in a slightly different way dozens, or hundreds, or millions of times. When given the ability to remember at least the last few encounters you have with one individual, the rules of the game change dramatically. Knowing what prior choices your opponent has made open up a world of possibilities; many different strategies. This leads us to the <a href="http://en.wikipedia.org/wiki/Prisoner&#39;s_dilemma#The_iterated_prisoners.27_dilemma">Iterated Prisoner&#39;s Dilemma</a>.</p>
+</preview>
+
+<p>So what did I do with this information? <a href="https://github.com/chill117/prisoners-dilemma/blob/master/prisoners_dilemma.php">Coded it in PHP</a>, of course. I created over a dozen different strategies, and pitted them against one another in over two and a half million iterations of the Prisoner&#39;s Dilemma. For each iteration, the two opponents&#39; strategies were chosen randomly. Here are the results:</p>
+
+<div class="prisoners-dilemma">
+	<div class="graph" id="pd-averages" style="height: 480px"></div>
+	<div class="graph" id="pd-matches" style="height: 480px"></div>
+	<div class="graph" id="pd-points" style="height: 480px"></div>
+</div>
+
+<p>An interesting next step would be to extend this further to test the effect population has on the success of each individual strategy. In other words, if Tit for Tat made up only 2% of the population, and some more malicious strategies made up a large chunk of the population, would the Tit for Tat strategy fair better or worse?</p>
+
+<p>If you're interested, the code is available <a href="https://github.com/chill117/prisoners-dilemma">in a GitHub repository.</a> If you are feeling inspired, please feel free to fork it or submit a pull request.</p>
+
+
+		<script src="/js/third_party/canvasjs.min.js"></script>
+
+		<script>
+
+			$(document).ready(function() {
+
+				var rawData = {
+					avg: {"Always_defect":43.656,"Naive_prober":55.153,"Tit_for_tat_suspicious":55.389,"Random":57.407,"Remorseful_prober":59.297,"Tit_for_tat_and_random":59.911,"Jekyll_and_hyde":60.578,"Tit_for_two_tats_and_random":61.07,"Grudger_soft":61.996,"Grudger":63.529,"Adaptive":63.575,"Always_cooperate":64.505,"Tit_for_tat":65.391,"Pavlov":65.533,"True_peace_maker":66.008,"Tit_for_two_tats":66.138,"Naive_peace_maker":66.363},
+					points: {"Always_defect":6484831,"Naive_prober":8109847,"Tit_for_tat_suspicious":8191105,"Random":8544724,"Remorseful_prober":8778899,"Tit_for_tat_and_random":8860862,"Jekyll_and_hyde":9095474,"Tit_for_two_tats_and_random":9105902,"Grudger_soft":9047731,"Grudger":9430195,"Adaptive":9481385,"Always_cooperate":9569642,"Tit_for_tat":9649395,"Pavlov":9759239,"True_peace_maker":9767129,"Tit_for_two_tats":9767175,"Naive_peace_maker":9853809},
+					matches: {"Always_defect":148543,"Naive_prober":147042,"Tit_for_tat_suspicious":147882,"Random":148845,"Remorseful_prober":148049,"Tit_for_tat_and_random":147901,"Jekyll_and_hyde":150144,"Tit_for_two_tats_and_random":149105,"Grudger_soft":145941,"Grudger":148440,"Adaptive":149138,"Always_cooperate":148354,"Tit_for_tat":147565,"Pavlov":148920,"True_peace_maker":147969,"Tit_for_two_tats":147679,"Naive_peace_maker":148483}
+				}
+
+				var dataPoints = {}
+
+				for (var type in rawData)
+				{
+					dataPoints[type] || (dataPoints[type] = [])
+
+					for (var strategy in rawData[type])
+					{
+						var dataPoint = {}
+						var label = strategy.replace(/_/g, ' ')
+
+						dataPoint.y = rawData[type][strategy]
+
+						switch (type)
+						{
+							case 'matches':
+								dataPoint.legendText = label
+								dataPoint.indexLabel = label
+							break
+
+							case 'avg':
+							case 'points':
+								dataPoint.label = label
+							break
+						}
+
+						dataPoints[type].push( dataPoint )
+					}
+				}
+
+				var charts = {}
+
+				charts.avg = new CanvasJS.Chart("pd-averages", {
+					fontColor: "#727272",
+					backgroundColor: 'transparent',
+					title:{
+						fontColor: "#aaa",
+						text: "Average Points Per Match",
+						fontSize: 16
+					},
+					legend: {
+						fontSize: 12
+					},
+					axisX: {
+						labelFontSize: 12,
+						gridColor: '#222',
+						gridThickness: 1,
+						lineColor: '#222',
+						lineThickness: 1,
+						tickColor: '#222',
+						tickThickness: 1
+					},
+					axisY: {
+						labelFontSize: 12,
+						gridColor: '#222',
+						gridThickness: 1,
+						lineColor: '#222',
+						lineThickness: 1,
+						tickColor: '#222',
+						tickThickness: 1
+					},
+					data: [
+						{
+							dataPoints: dataPoints.avg
+						}
+					]
+				})
+
+				charts.matches = new CanvasJS.Chart("pd-matches", {
+					fontColor: "#727272",
+					backgroundColor: 'transparent',
+					title:{
+						text: "Total Number of Matches",
+						fontColor: "#aaa",
+						fontSize: 16
+					},
+					legend: {
+						fontColor: "#727272",
+						fontSize: 12
+					},
+					data: [
+						{
+							type: "doughnut",
+							indexLabelFontSize: 12,
+							dataPoints: dataPoints.matches
+						}
+					]
+				})
+
+				charts.points = new CanvasJS.Chart("pd-points", {
+					fontColor: "#727272",
+					backgroundColor: 'transparent',
+					title:{
+						fontColor: "#aaa",
+						text: "Total Number of Points",
+						fontSize: 16
+					},
+					legend: {
+						fontSize: 12
+					},
+					axisX: {
+						labelFontSize: 12,
+						gridColor: '#222',
+						gridThickness: 1,
+						lineColor: '#222',
+						lineThickness: 1,
+						tickColor: '#222',
+						tickThickness: 1
+					},
+					axisY: {
+						labelFontSize: 12,
+						interval: 2500000,
+						gridColor: '#222',
+						gridThickness: 1,
+						lineColor: '#222',
+						lineThickness: 1,
+						tickColor: '#222',
+						tickThickness: 1
+					},
+					data: [
+						{
+							type: "bar",
+							dataPoints: dataPoints.points
+						}
+					]
+				})
+
+				for (var type in charts)
+					charts[type].render()
+
+			})
+
+		</script>

@@ -1,0 +1,35 @@
+<p>For the most recent stable release of CodeIgniter (2.1.3), there is a rather annoying <a href="http://www.hiretheworld.com/blog/tech-blog/codeigniter-session-race-conditions">simultaneous request problem</a> that will kill active sessions. You might have experienced this yourself if you had a website or application with lots of AJAX requests or other simultaneous requests. The tell-tail sign was that your users would be logged out after the update session time had passed (5 minutes by default).</p>
+
+<p>The <a href="http://stackoverflow.com/questions/7980193/codeigniter-session-bugging-out-with-ajax-calls">solution</a> that seemed to work for most folks involved extending the session library with your own <i>MY_Session.php</i> library that overwrote the <i>sess_update</i> method with one that only executed the update method when <strong>not</strong> an AJAX request:</p>
+
+<pre class="code php">&lt;?php if ( ! defined(&#039;BASEPATH&#039;)) exit(&#039;No direct script access allowed&#039;);
+
+require_once BASEPATH . &#039;/libraries/Session.php&#039;;
+
+class MY_Session extends CI_Session
+{
+
+	function __construct()
+	{
+		parent::__construct();
+
+		$this-&gt;CI-&gt;session = $this;
+	}
+
+	function sess_update()
+	{
+		// Do NOT update an existing session on AJAX calls.
+		if (!$this-&gt;CI-&gt;input-&gt;is_ajax_request())
+			return parent::sess_update();
+	}
+
+}
+
+/* End of file MY_Session.php */
+/* Location: ./application/libraries/MY_Session.php */
+</pre>
+
+<p>You can either auto-load this library from <i>config/autoload.php</i>:</p>
+<pre class="code php">$autoload[&#039;libraries&#039;] = array( &#039;MY_Session&#039;);</pre>
+<p>Or, you can load it later:</p>
+<pre class="code php">$this-&gt;load-&gt;library(&#039;MY_Session&#039;);</pre>

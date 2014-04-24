@@ -1,0 +1,74 @@
+
+<preview>
+	<p>Cross browser testing with Internet Explorer and Windows just got a whole lot easier. In this article I&#39;ll walk you through the full process of downloading, installing, and configuring a Windows Virtual Machine.</p>
+</preview>
+
+<h3>Get the Virtual Machine</h3>
+
+<p>Since this is a rather large file, you may want to limit the download speed for this particular download, so that it doesn&#39;t use up all of your bandwidth. From terminal run the following:</p>
+<pre class="code">cd ~/Downloads
+wget --limit-rate=500k http://virtualization.modern.ie/vhd/IEKitV1_Final/VirtualBox/Linux/IE9_Win7.zip</pre>
+<p>If the direct download link above does not work, you can get a fresh one <a href="http://www.modern.ie/en-us/virtualization-tools">here</a>.</p>
+<p>Once the download is complete, you&#39;ll need to "unzip" the zip archive. I use quotes there because I had issues using <i>unzip</i> on the file. I had to use <i>7z</i> to extract it. If you don&#39;t have this command, you&#39;ll need to install <i>p7zip-full</i>:</p>
+<pre class="code">sudo apt-get install p7zip-full</pre>
+<p>Now you should be able to extract the <i>zip</i> file:</p>
+<pre class="code">7z e IE9\ -\ Win7.zip</pre>
+<p>Once that&#39;s done, you should have a file named <i>IE9 - Win7.ova</i></p>
+
+<h3>Install VirtualBox</h3>
+<p>First you will need to <a href="https://www.virtualbox.org/wiki/Linux_Downloads">download VirtualBox</a>. Then you&#39;ll need to install it by running the <i>.deb</i>.</p>
+<p>Alternatively, you can get any previous version of VirtualBox and for many different platforms <a href="http://download.virtualbox.org/virtualbox/">here</a>.</p>
+<h3>Set Up the Virtual Machine</h3>
+<ol>
+	<li>Start up VirtualBox</li>
+	<li>Go to <i>File</i></li>
+	<li>Then <i>Import Appliance</i></li>
+	<li>Click <i>Open Appliance</i></li>
+	<li>Select the <i>IE9 - Win7.ova</i> file</li>
+	<li>Click <i>Next</i></li>
+</ol>
+<p>This should take a little while. Once it&#39;s done, start the Virtual Machine.</p>
+
+<h3>Fitting the VM to Your Screen Resolution</h3>
+<p>To make using the Virtual Machine bearable, you&#39;ll want to have it fit your screen resolution. To do this, you&#39;ll need to <a href="http://www.virtualbox.org/manual/ch04.html#additions-windows">install Guest Additions</a> in the Guest OS.</p>
+<p><a href="http://download.virtualbox.org/virtualbox/">Download the Guest Additions ISO</a> for your version of VirtualBox. It should be in the directory for your version. If you do not know what version of VirtualBox you&#39;re running:</p>
+<ol>
+	<li>Open VirtualBox</li>
+	<li>Go to <i>Help</i></li>
+	<li>Then <i>About VirtualBox</i></li>
+</ol>
+
+<h4>Installing Guest Additions</h4>
+<ol>
+	<li>In VirtualBox, click on the <i>IE9 - Win7</i> virtual machine.</li>
+	<li>Go to <i>Settings</i></li>
+	<li>Go to <i>Storage</i></li>
+	<li>Under <i>Controller: IDE Controller</i>, click <i>Add CD/DVD Device</i></li>
+	<li>Select the Guest Additions ISO you just downloaded</li>
+	<li>Click <i>OK</i> to save the settings</li>
+	<li>Start the Virtual Machine, if it isn&#39;t already</li>
+	<li>In Windows, go to <i>Start</i></li>
+	<li>Then, <i>Computer</i></li>
+	<li>You should see the <i>VirtualBox Guest Additions</i> CD under <i>Devices with Removable Storage</i></li><li>Open the <i>VirtualBox Guest Additions</i> CD</li>
+	<li>Run the <i>VBoxWindowsAdditions</i> installer</li>
+	<li>Follow the instructions in the installer</li>
+	<li>When the installation is complete, you&#39;ll need to restart the virtual machine</li>
+</ol>
+
+<p>After the virtual machine reboots, it should now utilize the full resolution of your screen when in full screen mode.</p>
+
+<h3>Extras</h3>
+<p>These are solutions for some edge use-cases that you may find useful.</p>
+
+<h4>Disabling Mouse Integration Mode</h4>
+<p>You may need to disable "Mouse Integration Mode" in order to use your mouse in the Virtual Machine. You can do this simply with your keyboard while in the VM window: <i>Host Key + I</i>. The Host Key is usually the right Ctrl key.</p>
+
+<h4>Accessing Your Host Machine&#39;s Web Root</h4>
+<p>If you&#39;ve got a local environment set up for your projects, you&#39;ll probably want to be able to access those projects locally while on your Virtual Machine. To accomplish this, you will have to modify Windows 7&#39;s <i>hosts</i> file; which is located at:</p>
+<pre class="code">C:\Windows\System32\drivers\etc\hosts</pre>
+<p>You&#39;ll have to open NotePad as Administrator in order to modify the hosts file.</p>
+<p>If you only need to be able to access <i>localhost</i>, just add the following line:</p>
+<pre class="code">10.0.2.2   outer</pre>
+<p>If you want to be able to use your virtual hosts too, follow the pattern below for each of your virtual hosts:</p>
+<pre class="code">10.0.2.2   domain-name.local</pre>
+<p>That&#39;s it!</p>

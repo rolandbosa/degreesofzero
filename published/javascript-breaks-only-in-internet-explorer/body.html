@@ -1,0 +1,5 @@
+<p>Do you use <i>console.log()</i> to debug your JavaScript? Well, I&#39;ve got news for you.. <i>console.log()</i> breaks Internet Explorer; <strong>even if all instances of it are commented out!</strong> A quick check you can do to see if <span class="code">console.log()</span> is indeed the source of your problem, is to open the console in Internet Explorer and see if the problem goes away. The reason for this is that <span class="code">console.log()</span> does not exist in Internet Explorer unless the developer tools are active. So, for regular IE users,<span class="code">console.log()</span> is a show stopper.</p>
+
+<h3>The Solution</h3>
+<p>You can either make sure you don&#39;t ship your JavaScript with any instances of <span class="code">console.log()</span> in it, or you can place the following code near the top of your JavaScript to ensure that it exists (albeit non-functional):</p>
+<pre class="code js">if ( ! window.console ) console = { log: function(){} };</pre>
