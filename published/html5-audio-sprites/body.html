@@ -1,0 +1,150 @@
+<preview>
+	<p>Since you're reading this, you probably have a pile of sound files in a web application wondering if there's a better way. And, since you are probably already familiar with how image sprites work, you got to thinking that maybe you could do the same thing for audio. Well, you're in luck. You can! And, with a bit of third-party-library magic, it's possible across all the major browsers.</p>
+</preview>
+
+<p>Right off the bat, here's a working demo of an audio sprite:</p>
+<iframe src="/demos/audio-sprites" style="width: 100%; height: 60px"></iframe>
+
+<p>Each button plays a different sound, but all from a single audio file. This is done by specifying an <strong>offset</strong> and <strong>length</strong> for each individual sound that is contained within the audio sprite file. When you want to play a particular sound, the audio file begins playing at that sound's offset and finishes playing after a specific amount of time specified by that sound's length. Here is the little helper class that I wrote to help with this:</p>
+
+<pre class="code js">
+	var SoundManager = function(options) {
+
+		this.options = options || {}
+		this.options.alternateExtensions || (this.options.alternateExtensions = [])
+
+		this.initialize()
+
+	}
+
+	SoundManager.prototype.initialize = function() {
+
+		if (!this.canPlaySounds())
+			return
+
+		createjs.Sound.alternateExtensions = this.options.alternateExtensions
+
+		var soundsToPreload = [], soundsToPreloadObj = {}
+
+		for (var i in this.options.sounds)
+		{
+			var sound = this.options.sounds[i]
+
+			if (!soundsToPreloadObj[ sound.src ])
+			{
+				soundsToPreload.push( sound )
+				soundsToPreloadObj[ sound.src ] = true
+			}
+		}
+
+		createjs.Sound.addEventListener('fileload', function(e) {
+
+			// An audio file was loaded.
+
+		})
+
+		for (var i in soundsToPreload)
+		{
+			var sound = soundsToPreload[i]
+			var fullFilePath = this.options.basePath + sound.fileName
+
+			createjs.Sound.registerSound(fullFilePath, sound.id, this.options.basePath)
+		}
+
+	}
+
+	SoundManager.prototype.play = function(id) {
+
+		if (!this.canPlaySounds())
+			return
+
+		var sound = this.findSoundById(id)
+
+		if (!sound)
+			// Nothing to play..
+			return
+
+		var fullFilePath = this.options.basePath + sound.fileName
+		var options = {}
+
+		options.offset = sound.offset || 0
+
+		var instance = createjs.Sound.play(fullFilePath, options)
+
+		if (sound.length)
+			setTimeout(function() {
+
+				instance.stop()
+
+			}, sound.length)
+
+	}
+
+	SoundManager.prototype.findSoundById = function(id) {
+
+		for (var i in this.options.sounds)
+		{
+			var sound = this.options.sounds[i]
+
+			if (!!sound.id && sound.id == id)
+				return sound
+		}
+
+		return null
+
+	}
+
+	SoundManager.prototype.canPlaySounds = function() {
+
+		return !!createjs.Sound.initializeDefaultPlugins()
+
+	}
+</pre>
+
+<p>You may have noticed the references to <span class="code">createjs</span>. This is the third-party library I was talking about earlier. You can find it <a href="https://github.com/CreateJS/SoundJS/">here</a>. It makes working with HTML5 audio across browsers much easier.</p>
+
+<p>Here is the snippet that creates an instance of the <span class="code">SoundManager</span> class from above:</p>
+<pre class="code js">
+	var Sound = new SoundManager({
+
+		basePath: 'sounds/',
+
+		sounds: [
+			{fileName: 'all.ogg', offset: 0, length: 115, id: 'sound1'},
+			{fileName: 'all.ogg', offset: 1000, length: 205, id: 'sound2'},
+			{fileName: 'all.ogg', offset: 2000, length: 524, id: 'sound3'}
+		],
+
+		alternateExtensions: ['m4a']
+
+	})
+</pre>
+<p>You might notice the extra padding on the sounds above. This is due to the imprecision in HTML5 audio playback. This is something that likely varies between browsers, but I've found that it's just a good idea to include a bit of padding between each sound. I think rounding up to the neareast whole second is probably sufficient.</p>
+
+<p>And now, all that is left to be done is listen to the button-click events and play some sounds:</p>
+<pre class="code js">
+
+	var button1 = document.getElementById('play-sound-button-1'),
+		button2 = document.getElementById('play-sound-button-2'),
+		button3 = document.getElementById('play-sound-button-3')
+
+	button1.addEventListener('click', function(e) {
+
+		Sound.play('sound1')
+
+	})
+
+	button2.addEventListener('click', function(e) {
+
+		Sound.play('sound2')
+
+	})
+
+	button3.addEventListener('click', function(e) {
+
+		Sound.play('sound3')
+
+	})
+</pre>
+
+<p>Well, that's about it for audio sprites. Have some noisy fun out there!</p>
