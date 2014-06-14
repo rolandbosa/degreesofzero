@@ -1,1 +1,39 @@
-<p>This article contains a list of useful terminal commands and explanations of what they do and why. I&#39;ll continually add to this list as I discover more neat terminal tricks.</p><br><h3>Exclude SVN and GIT Files While Backing Up a Directory</h3><p>If you&#39;re like me, you have quite  a few projects that use a mix of SVN and GIT version control systems. You may want to exclude all those hidden SVN and GIT files from your backup:</p><pre class="code" data-type="code">sudo tar --exclude-vcs -zcvf ./backup.tar.gz /path/to/projects/directory</pre><br><h3>Output Result of a Terminal Command to a FIle</h3><p>Sometimes when using terminal, a command will generate such a large amount of output that it gets cut-off towards the beginning. The way to view the full output is by writing it to a file:</p><pre class="code" data-type="code">cd ~/<br>ls -l &gt; output.txt</pre><p>Now if you open output.txt in <i>gedit</i> you should see a list of all the visible files and directories within the current user&#39;s home directory.</p><br><h3>Limit Download Speed for Large File Downloads</h3><p>If you&#39;ve ever needed to download a very large file, but didn&#39;t want to completely tie up your internet connection&#39;s bandwidth, you&#39;re going to love this:</p><pre class="code" data-type="code">cd ~/Downloads<br>wget --limit-rate=500k http://url-of-file-to-download</pre><p><a href="http://manpages.ubuntu.com/manpages/precise/man1/wget.1.html">wget</a> does a GET request to a specified URL. The <i>--limit-rate</i> option sets a maximum download speed for this download.</p>
+
+<p>This article contains a few useful things that can be done in terminal; with explanations of what they do and why. I&#39;ll continually add to this list as I learn more.</p>
+
+
+<h3>Exclude SVN and GIT Files While Backing Up a Directory</h3>
+
+<p>If you&#39;re like me, you have quite  a few projects that use a mix of SVN and GIT version control systems. You may want to exclude all those hidden SVN and GIT files from your backup:</p>
+<pre class="code">sudo tar --exclude-vcs -zcvf ./backup.tar.gz /path/to/projects/directory</pre>
+
+
+<h3>Limit Download Speed for Large File Downloads</h3>
+
+<p>If you&#39;ve ever needed to download a very large file, but didn&#39;t want to completely tie up your internet connection&#39;s bandwidth, you&#39;re going to love this:</p>
+<pre class="code" data-type="code">
+cd ~/Downloads
+wget --limit-rate=500k http://url-of-file-to-download
+</pre>
+<p><a href="http://manpages.ubuntu.com/manpages/precise/man1/wget.1.html">wget</a> does a GET request to a specified URL. The <i>--limit-rate</i> option sets a maximum download speed for this download.</p>
+
+
+<h3>Output Result of a Terminal Command to a File</h3>
+
+<p>Sometimes when using terminal, a command will generate such a large amount of output that it gets cut-off towards the beginning. The way to view the full output is by writing it to a file:</p>
+
+<pre class="code">
+cd ~/
+ls -l &gt; output.txt
+</pre>
+
+<p>Now if you open output.txt in <i>gedit</i> you should see a list of all the visible files and directories within the current user&#39;s home directory.</p>
+
+
+<h3>Pipe the Output of One Command into Another</h3>
+
+<p>Sometimes it's helpful to chain commands together, like this:</p>
+<pre class="code">
+ls -l | grep somefile
+</pre>
+<p><span class="code">ls</span> lists the contents of the current directory. And, <span class="code">grep</span> does pattern matching on the string that is passed to it. The net result of this combination is finding all files in the current directory that at least partially match the text <span class="code">somefile</span></p>
