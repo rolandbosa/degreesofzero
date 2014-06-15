@@ -5,26 +5,27 @@
 
 <h3>Dependencies</h3>
 
-<p>To get <span class="code">add-apt-repository</span>, which we will use next:</p>
+<p>To get <span class="code">add-apt-repository</span>, which we will use later to add the bitcoin PPA:</p>
 <pre class="code">
 sudo apt-get install python-software-properties
 </pre>
 
-<p>Add the bitcoin PPA to get access to <span class="code">libdb4.8++-dev</span>:</p>
+<p>Add the bitcoin PPA to get access to the <span class="code">libdb4.8++-dev</span> package:</p>
 <pre class="code">
 add-apt-repository ppa:bitcoin/bitcoin
 apt-get update
 </pre>
 
-<p>Finally you can install the dependencies:</p>
+<p>Now you can install all the dependencies:</p>
 <pre class="code">
 apt-get install libboost-all-dev libdb4.8-dev libdb4.8++-dev
 </pre>
+<p>If you're reading this from the future, you may want to check with the readme file(s) for the specific version of bitcoind you are installing. The dependencies may have changed.</p>
 
 
 <h3>The Binary</h3>
 
-<p>Put the bitcoind binary in the <span class="code">/usr/local/bin</span> directory. Then add a symlink in <span class="code">/usr/bin</span>:</p>
+<p>Put the bitcoind binary that you built from the previous tutorial in the <span class="code">/usr/local/bin</span> directory. Then add a symlink in <span class="code">/usr/bin</span>:</p>
 <pre class="code">
 ln -s /usr/local/bin/bitcoind /usr/bin/bitcoind
 </pre>
@@ -53,22 +54,19 @@ rpcpassword=UNIQUE_RPC_PASSWORD
 
 <h3>Starting bitcoind</h3>
 
-<p>Now you're ready to start bitcoind:</p>
+<p>Now you're ready to start bitcoind. Simply enter the following in your terminal:</p>
 <pre class="code">
 bitcoind
 </pre>
+<p>If all is well, <span class="code">Bitcoin server starting</span> should be printed to the terminal.</p>
 
-<p>If all is well you should see the following in your console:</p>
-<pre class="code">
-Bitcoin server starting
-</pre>
-
-<p>To view info about your bitcoind instance:</p>
+<p>To view info about your bitcoind instance enter the following:</p>
 <pre class="code">
 bitcoind getinfo
 </pre>
+<p>If you receive <span class="code">error: couldn't connect to server</span> after starting bitcoind, you may need to simply wait a little bit for bitcoind to finish its pre-start checks.</p>
 
-<p>And to view a list of all available commands:</p>
+<p>To view a list of all available commands:</p>
 <pre class="code">
 bitcoind help
 </pre>

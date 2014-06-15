@@ -14,35 +14,36 @@ tar -zxvf v0.9.2.tar.gz
 
 <h3>Dependencies</h3>
 
-<p>To get <span class="code">add-apt-repository</span>, which we will use next:</p>
+<p>To get <span class="code">add-apt-repository</span>, which we will use later to add the bitcoin PPA:</p>
 <pre class="code">
 sudo apt-get install python-software-properties
 </pre>
 
-<p>Add the bitcoin PPA to get access to <span class="code">libdb4.8++-dev</span>:</p>
+<p>Add the bitcoin PPA to get access to the <span class="code">libdb4.8++-dev</span> package:</p>
 <pre class="code">
 add-apt-repository ppa:bitcoin/bitcoin
 apt-get update
 </pre>
 
-<p>Finally you can install the dependencies:</p>
+<p>Now you can install all the dependencies, including the build dependencies:</p>
 <pre class="code">
 apt-get install build-essential
 apt-get install libtool autotools-dev autoconf
 apt-get install libssl-dev
 apt-get install libboost-all-dev libdb4.8-dev libdb4.8++-dev
 </pre>
+<p>If you're reading this from the future, you may want to check with the readme file(s) for the specific version of bitcoind that you are building. The dependencies may have changed.</p>
 
 
 <h3>Build</h3>
 
-<p>It's time to build:</p>
+<p>Finally, it's time to build:</p>
 <pre class="code">
 cd /usr/local/src/bitcoin-0.9.2
 ./autogen.sh
 ./configure --with-cli=no --with-gui=no
 make
 </pre>
-<p>This will take a little while.</p>
+<p>This will take a little while. If you encounter errors during the build process, first try searching the <a href="https://github.com/bitcoin/bitcoin">bitcoin GitHub repo</a> or try checking the readme file(s) for the specific version of bitcoind that are you are building.</p>
 
 <p>After the build process has completed with no errors, you should end up with a bitcoind binary located at <span class="code">/usr/local/src/bitcoin-0.9.2/src/bitcoind</span>. Now it's time to move on to <a href="https://degreesofzero.com/article/installing-bitcoind-on-ubuntu.html">installing bitcoind on Ubuntu</a>.</p>
