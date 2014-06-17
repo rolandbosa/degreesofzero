@@ -1,11 +1,11 @@
 <preview>
-	<p>Since you're reading this, you probably have a pile of sound files in a web application wondering if there's a better way. And, since you are probably already familiar with how image sprites work, you got to thinking that maybe you could do the same thing for audio. Well, you're in luck. You can! And, with a bit of third-party-library magic, it's possible across all the major browsers.</p>
+	<p>Since you're reading this, you probably have a pile of sound files in a web application wondering if there's a better way. And since you already know how image sprites work, you got to thinking that maybe you could do the same thing for audio. Well, you're in luck. You can! And, with a bit of third-party-library magic, it's possible across all the major browsers.</p>
 </preview>
 
 <p>Right off the bat, here's a working demo of an audio sprite:</p>
 <iframe src="/demos/audio-sprites" style="width: 100%; height: 60px"></iframe>
 
-<p>Each button plays a different sound, but all from a single audio file. This is done by specifying an <strong>offset</strong> and <strong>length</strong> for each individual sound that is contained within the audio sprite file. When you want to play a particular sound, the audio file begins playing at that sound's offset and finishes playing after a specific amount of time specified by that sound's length. Here is the little helper class that I wrote to help with this:</p>
+<p>Each button plays a different sound, but all from a single audio file. This is done by specifying an <strong>offset</strong> and a <strong>length</strong> for each individual sound that is contained within the audio sprite file. When you want to play a particular sound, the audio file begins playing at that sound's offset and finishes playing after a specific amount of time specified by that sound's length. Here is the little helper class that I wrote to help with this:</p>
 
 <pre class="code js">
 	var SoundManager = function(options) {
