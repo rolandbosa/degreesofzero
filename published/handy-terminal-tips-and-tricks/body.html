@@ -37,3 +37,19 @@ ls -l &gt; output.txt
 ls -l | grep somefile
 </pre>
 <p><span class="code">ls</span> lists the contents of the current directory. And, <span class="code">grep</span> does pattern matching on the string that is passed to it. The net result of this combination is finding all files in the current directory that at least partially match the text <span class="code">somefile</span></p>
+
+
+<h3>Manually Expire/Exit Sudo Session</h3>
+
+<p>After you've used <span class="code">sudo</span> to execute a terminal command, the sudo session will persist for some time after. What this means is that you won't be prompted for the password for the root user when using sudo during this session. To expire the sudo session do the following:</p>
+<pre class="code">
+sudo -k
+</pre>
+
+
+<h3>Exit su Session</h3>
+
+<p>To manually exit from a <span class="code">su - someuser</span> session:</p>
+<pre class="code">
+exit
+</pre>
