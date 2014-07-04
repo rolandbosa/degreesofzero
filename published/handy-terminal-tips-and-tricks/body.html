@@ -23,7 +23,6 @@ wget --limit-rate=500k http://url-of-file-to-download
 <p>Sometimes when using terminal, a command will generate such a large amount of output that it gets cut-off towards the beginning. The way to view the full output is by writing it to a file:</p>
 
 <pre class="code">
-cd ~/
 ls -l &gt; output.txt
 </pre>
 
@@ -37,6 +36,15 @@ ls -l &gt; output.txt
 ls -l | grep somefile
 </pre>
 <p><span class="code">ls</span> lists the contents of the current directory. And, <span class="code">grep</span> does pattern matching on the string that is passed to it. The net result of this combination is finding all files in the current directory that at least partially match the text <span class="code">somefile</span></p>
+
+
+<h3>Search Running Processes by Keyword</h3>
+
+<p>Here we're going to pipe the output of the <span class="code">ps aux</span> command - which lists all running processes - into <span class="code">grep</span> with a keyword, to retrieve a list of running processes that matches our keyword:</p>
+<pre class="code">
+ps aux | grep ssh
+</pre>
+<p>Where <span class="code">ssh</span> is our keyword.</p>
 
 
 <h3>Manually Expire/Exit Sudo Session</h3>
