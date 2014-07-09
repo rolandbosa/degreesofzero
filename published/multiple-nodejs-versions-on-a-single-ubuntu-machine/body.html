@@ -1,0 +1,150 @@
+<h3>Overview</h3>
+<preview>
+<p>The goal is to have multiple versions of nodejs (with npm) available on a single Ubuntu machine. For the sake of simplicity, we will use version 0.8.x of node.js in this article. If you're using a different linux distribution, you can probably follow the instructions here, except with a few minor changes to match your distro's way of doing things.</p>
+</preview>
+
+
+<h3>Dependencies</h3>
+<p>Install build dependencies:</p>
+<pre class="code bash">
+sudo apt-get install g++ make
+</pre>
+
+
+<h3>Create Ubuntu User</h3>
+<p>Create a new user for each version of node.js that you wish to install. In this article we're installing node.js 0.8.x:</p>
+<pre class="code bash">
+sudo useradd -d /home/nodejs-0.8.x -m nodejs-0.8.x
+</pre>
+
+
+<h3>Pre-Installation</h3>
+<p>Open a su session as the nodejs-0.8.x user:</p>
+<pre class="code bash">
+sudo su - nodejs-0.8.x
+</pre>
+
+<p>Create the <span class="code">~/.npmrc</span> file:</p>
+<pre class="code bash">
+vim ~/.npmrc
+</pre>
+
+<p>Add the following lines to the <span class="code">~/.npmrc</span> file:</p>
+<pre class="code bash">
+root = /home/nodejs-0.8.x/.local/lib/node_modules
+binroot = /home/nodejs-0.8.x/.local/bin
+manroot = /home/nodejs-0.8.x/.local/share/man
+</pre>
+
+<p>Create the <span class="code">~/.local</span> directory:</p>
+<pre class="code bash">
+mkdir ~/.local
+</pre>
+
+
+<h3>Building Node.js from Source</h3>
+<p>Download the latest 0.8.x release of nodejs. We'll use 0.8.27 here, because that was the latest version as of the time this article was written:</p>
+<pre class="code bash">
+wget https://github.com/joyent/node/archive/v0.8.27.tar.gz ~/
+</pre>
+
+<p>Unpack the gzipped archive:</p>
+<pre class="code bash">
+tar -xzvf ~/v0.8.27.tar.gz
+</pre>
+
+<p>Change directories into the directory that was just created:</p>
+<pre class="code bash">
+cd ~/node-0.8.27
+</pre>
+<p>Check that all dependencies are met by looking at the <span class="code">README.md</span> file.</p>
+
+<p>Configure the build:</p>
+<pre class="code bash">
+./configure --prefix=~/.local
+</pre>
+
+<p>Initiate the build process:</p>
+<pre class="code bash">
+make
+</pre>
+<p>This will take a while.</p>
+
+
+<h3>Installing Node.js</h3>
+<p>Once the build process has finished, run the installation:</p>
+<pre class="code bash">
+make install
+</pre>
+
+<p>Add <span class="code">.node_modules</span> symlink:</p>
+<pre class="code bash">
+ln -s ~/.local/lib/node_modules ~/.node_modules
+</pre>
+
+<p>Add npm to the nodejs-0.8.x user's $PATH by adding the following to end of the <span class="code">~/.profile</span> file:</p>
+<pre class="code bash">
+export PATH=$HOME/.local/bin:$PATH
+</pre>
+
+<p>Exit the su session:</p>
+<pre class="code bash">
+exit
+</pre>
+
+<h3>Verifying the Installation</h3>
+<p>Open a su session as the nodejs-0.8.x user:</p>
+<pre class="code bash">
+sudo su - nodejs-0.8.x
+</pre>
+
+<p>To verify that node was installed correctly:</p>
+<pre class="code bash">
+node -v
+</pre>
+<p>Should output the correct version number for node, like this:</p>
+<pre class="code bash">
+v0.8.27
+</pre>
+
+<p>And to verify that npm was installed correctly:</p>
+<pre class="code bash">
+npm -v
+</pre>
+<p>Should output the correct version number for npm, like this:</p>
+<pre class="code bash">
+1.2.30
+</pre>
+
+<p>Exit the su session:</p>
+<pre class="code bash">
+exit
+</pre>
+
+
+<h3>Clean up</h3>
+<p>Once everything has been installed and is working properly, you can go ahead and delete these files:</p>
+<pre class="code bash">
+rm -R /home/nodejs-0.8.x/node-0.8.27
+rm /home/nodejs-0.8.x/v0.8.27.tar.gz
+</pre>
+
+
+<h3>Using the Node.js Version</h3>
+
+<p>Now anytime you wish to use this specific version of node.js, you simply start a su session as the nodejs-0.8.x user:</p>
+<pre class="code bash">
+sudo su - nodejs-0.8.x
+</pre>
+
+<p>Then, to run a node app:</p>
+<pre class="code bash">
+node your-app.js
+</pre>
+
+<p>Or, to use npm:</p>
+<pre class="code bash">
+npm help
+</pre>
+
+<p>The specific version of node.js (and npm) that you just installed will only be available to that user. You can install any number of versions of node.js in this manner.</p>
