@@ -1,0 +1,108 @@
+<preview>
+<p>This article will walk you through the step-by-step process of installing node.js (with npm) from source on Ubuntu. If you're using a linux distribution other than Ubuntu, you can probably follow the instructions here, except with a few minor changes to match your distro's way of doing things.</p>
+</preview>
+
+
+<h3>Dependencies</h3>
+
+<p>Install build dependencies:</p>
+<pre class="code bash">
+sudo apt-get install g++ make
+</pre>
+
+
+<h3>Pre-Installation</h3>
+
+<p>Create the <span class="code">~/.npmrc</span> file:</p>
+<pre class="code bash">
+vim ~/.npmrc
+</pre>
+
+<p>Set the contents of the <span class="code">~/.npmrc</span> file to the following:</p>
+<pre class="code bash">
+root = ~/.local/lib/node_modules
+binroot = ~/.local/bin
+manroot = ~/.local/share/man
+</pre>
+
+<p>Create the <span class="code">~/.local</span> directory:</p>
+<pre class="code bash">
+mkdir ~/.local
+</pre>
+
+
+<h3>Building Node.js from Source</h3>
+
+<p>Download the latest stable release of nodejs. We'll use 0.10.29 here, because that was the latest stable release as of the time this article was written:</p>
+<pre class="code bash">
+wget https://github.com/joyent/node/archive/v0.10.29.tar.gz ~/
+</pre>
+
+<p>Unpack the gzipped archive:</p>
+<pre class="code bash">
+tar -xzvf ~/v0.10.29.tar.gz
+</pre>
+
+<p>Change directories into the directory that was just created:</p>
+<pre class="code bash">
+cd ~/node-0.10.29
+</pre>
+
+<p>Configure the build:</p>
+<pre class="code bash">
+./configure --prefix=~/.local
+</pre>
+<p>If you encountered errors during the configure step, you may need to check that all dependencies are met by looking at the <span class="code">README.md</span> file in the unpacked source directory.</p>
+
+<p>After you have successfully configured the build, you can initiate the build process:</p>
+<pre class="code bash">
+make
+</pre>
+<p>This will take a while.</p>
+
+
+<h3>Installing Node.js</h3>
+<p>Once the build process has finished, run the installation:</p>
+<pre class="code bash">
+make install
+</pre>
+
+<p>Create <span class="code">.node_modules</span> symlink:</p>
+<pre class="code bash">
+ln -s ~/.local/lib/node_modules ~/.node_modules
+</pre>
+
+<p>Add npm to your <span class="code">$PATH</span> by adding the following to the end of the <span class="code">~/.profile</span> file:</p>
+<pre class="code bash">
+export PATH=$HOME/.local/bin:$PATH
+</pre>
+
+
+<h3>Verifying the Installation</h3>
+
+<p>To verify that node was installed correctly:</p>
+<pre class="code bash">
+node -v
+</pre>
+<p>Should output the correct version number for node, like this:</p>
+<pre class="code bash">
+v0.10.29
+</pre>
+
+<p>And to verify that npm was installed correctly:</p>
+<pre class="code bash">
+npm -v
+</pre>
+<p>Should output the correct version number for npm, like this:</p>
+<pre class="code bash">
+1.4.14
+</pre>
+
+
+<h3>Clean up</h3>
+
+<p>Once everything has been installed and is working properly, you can go ahead and delete the source files:</p>
+<pre class="code bash">
+rm -R /home/nodejs-0.10.x/node-0.10.29
+rm /home/nodejs-0.10.x/v0.10.29.tar.gz
+</pre>
