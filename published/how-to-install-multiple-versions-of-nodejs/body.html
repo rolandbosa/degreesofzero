@@ -1,0 +1,89 @@
+<preview>
+<p>There are a number of reasons you would need to install multiple versions of node.js on one machine. Perhaps you need to test your node applications with different versions of node. Or maybe you just want to try out the latest, bleeding-edge version of node without having to uninstall your current version. In any event, wouldn't it be great if you could do all that? Well, as it turns out, this is relatively easy thanks to the <a href="https://github.com/creationix/nvm">nvm</a> (Node Version Manager) project. It allows you to easily install and manage multiple different versions of node.</p>
+
+<p>This article was written specifically for Ubuntu, but if you're using a different linux distribution, you can probably still follow the instructions here, except with a few minor changes to match your distro's way of doing things.</p>
+</preview>
+
+
+<h3>Install nvm</h3>
+
+<p>The first step towards installing nvm is to download the latest release:</p>
+<pre class="code bash">
+wget https://github.com/creationix/nvm/archive/v0.10.0.tar.gz ~/
+</pre>
+<p>Version 0.10.0 of nvm is used here, because it was the latest release as of the time this article was written. You may want to check for the <a href="https://github.com/creationix/nvm/releases">latest release</a>.</p>
+
+<p>Unpack the gzipped archive you just downloaded:</p>
+<pre class="code bash">
+tar -zxvf ~/v0.10.0.tar.gz
+</pre>
+
+<p>Rename the directory that was just created:</p>
+<pre class="code bash">
+mv ~/nvm-0.10.0 ~/.nvm
+</pre>
+
+<p>Run the installation script:</p>
+<pre class="code bash">
+~/.nvm/install.sh
+</pre>
+
+<p>Add the following to the end of the <span class="code">~/.bashrc</span> file:</p>
+<pre class="code bash">
+source ~/.nvm/nvm.sh
+</pre>
+
+<p>Close and re-open the terminal window.</p>
+
+<p>Verify that nvm was installed correctly:</p>
+<pre class="code bash">
+nvm --version
+</pre>
+<p>Should output the version number of nvm, like this:</p>
+<pre class="code bash">
+0.10.0
+</pre>
+
+
+<h3>Build Dependencies</h3>
+
+<p>In case nvm needs to build a version of node from source, you'll want to install the build dependencies:</p>
+<pre class="code bash">
+sudo apt-get install g++ make
+</pre>
+
+
+<h3>Install Different Versions of Node.js</h3>
+
+<p>Now that you have nvm installed, you can install a specific version of node.js like this:</p>
+<pre class="code bash">
+nvm install v0.10.29
+</pre>
+<p>This will take a little while.</p>
+
+<p>Once the installation of v0.10.29 is complete, try installing another version:</p>
+<pre class="code bash">
+nvm install v0.8.27
+</pre>
+
+<p>You can view a list of node.js versions that you have installed like this:</p>
+<pre class="code bash">
+nvm ls
+</pre>
+
+<p>To switch to a specific version of node:</p>
+<pre class="code bash">
+nvm use v0.10.29
+</pre>
+
+<p>To set an alias:</p>
+<pre class="code bash">
+nvm alias 0.10.x 0.10.29
+</pre>
+
+<p>To set the default node version:</p>
+<pre class="code bash">
+nvm alias default 0.10.29
+</pre>
+
+<p>Well, that's about it. If you have any questions or need help debugging, try the <a href="https://github.com/creationix/nvm">nvm GitHub repository</a> for more information.</p>
