@@ -1,0 +1,234 @@
+<preview>
+<p>So you have some bitcoins that you want to &quot;secure&quot;, but aren&#39;t sure of how to do that. Not a problem! This tutorial will guide you through the process of creating a secure wallet with which you can send, receive, and safely store your bitcoins. Before we get too far down the rabbit hole, make sure you&#39;ve got a USB flash drive with at least 4 GB of space.</p>
+</preview>
+
+
+<h3>Step 1: Download Ubuntu</h3>
+
+<p>You can download the latest release of Ubuntu <a href="http://www.ubuntu.com/download/desktop">here</a>. You will be downloading an <a href="https://en.wikipedia.org/wiki/ISO_image">ISO</a> file, which is an archive of an optical disc. You could use this file to create a CD/DVD, or there are programs that can directly mount an ISO as if it were a physical CD/DVD in your computer&#39;s CD/DVD drive. We&#39;re going to be using this file to create a bootable USB flash drive.</p>
+
+
+<h3>Step 2: Verify the Ubuntu ISO</h3>
+
+<p>After you have finished downloading the Ubuntu ISO, you&#39;ll want to verify it by comparing its md5 hash to the one provided to you on the Ubuntu website; you can view the <a href="https://help.ubuntu.com/community/UbuntuHashes">list of hashes here</a>. Find the hash that corresponds to the ISO that you downloaded earlier. These md5 hashes are 32 character length strings of text that were created by passing the contents of each ISO into the <a href="https://en.wikipedia.org/wiki/MD5">md5 hashing algorithm</a>. If you give the md5 algorithm the exact same input data more than once, it will output the exact same 32 character string every time. This is important because this is how you can be sure that the ISO you downloaded has not been tampered with or corrupted in some way.</p>
+
+
+<h4>For Windows Users</h4>
+
+<p>If you&#39;re on a Windows machine, you can use <a href="http://winmd5.com/">winmd5</a> to verify the ISO&#39;s md5 hash. It provides a graphical interface for you, so you don&#39;t even need to use your command prompt.</p>
+
+<p>Download the winmd5 program, then run it. Select the ISO file you downloaded earlier. Then, enter the md5 hash provided to you from the Ubuntu website in the bottom text field. After the hash has been computed for the ISO file, push the verify button to compare them. If they match, congratulations! You&#39;ve just successfully verified the ISO file. You can now move on to the next step.</p>
+
+
+<h4>For Linux Users</h4>
+
+<p>If you&#39;re using some flavor of Linux, you can use the <span class="code">md5sum</span> program to check the md5 hash of the ISO. Navigate to the directory in which you stored the ISO, then run the following command in your terminal:</p>
+<pre class="code">
+md5sum ubuntu-14.04-desktop-amd64.iso
+</pre>
+<p>The name of the ISO file may be different, so just replace the one above with the file name of the ISO you downloaded earlier.</p>
+<p>This may take a little bit of time to process, depending upon the speed of your computer.</p>
+
+<p>Once you&#39;ve created an md5 hash from the contents of the ISO, compare it to the one you downloaded from the Ubuntu website. If they match, congratulations! You&#39;ve just successfully verified the ISO file. You can now move on to the next step.</p>
+
+
+<h3>Step 3: Create a Bootable USB Flash Drive</h3>
+
+<p>Before you start writing anything to the flash drive, you&#39;ll need to prep it by creating two separate partitions with the correct file system format for each.</p>
+
+<h4>For Windows</h4>
+
+<p>If you&#39;re on Windows, you can find a good tutorial for how to use a program called <i>&quot;diskpart&quot;</i> to partition your flash drive <a href="http://www.doztech.net/howto/format-your-flash-drive-with-diskpart/">here</a>.</p>
+
+<p>Be sure to create <strong>two separate partitions</strong> on the flash drive as follows:</p>
+<ul>
+	<li><strong>2048 MB</strong> of space, <strong>ext4</strong> file system format, and the label <i>&quot;Ubuntu&quot;</i>; this partition is the one on which we will install the Ubuntu bootloader.</li>
+	<li>The rest of the remaining space, <strong>NTFS</strong> file system format, and the label <i>&quot;Storage&quot;</i>; this partition will be used to store extra files.</li>
+</ul>
+
+<h4>For Linux</h4>
+
+<p>If you&#39;re on a Linux machine, you can use <i>&quot;GParted&quot;</i> to partition your flash drive; here&#39;s a <a href="http://www.howtogeek.com/howto/17001/how-to-format-a-usb-drive-in-ubuntu-using-gparted/">helpful tutorial</a> to guide you through the process if you haven&#39;t ever done it before.</p>
+
+<div class="center">
+	<div class="image">
+		<a href="/images/uploads/gparted-partition-flash-drive-for-bootloader-screenshot.jpg" title="Screenshot of using GParted to partition the flash drive in preparation for the bootloader">
+			<img src="/images/uploads/gparted-partition-flash-drive-for-bootloader-screenshot.jpg" alt="">
+		</a>
+		<p class="caption"></p>
+	</div>
+</div>
+
+<p>Be sure to create <strong>two separate partitions</strong> on the flash drive as follows:</p>
+<ul>
+	<li><strong>2048 MB</strong> of space, <strong>ext4</strong> file system format, and the label <i>&quot;Ubuntu&quot;</i>; this partition is the one on which we will install the Ubuntu bootloader.</li>
+	<li>The rest of the remaining space, <strong>ext4</strong> file system format, and the label <i>&quot;Storage&quot;</i>; this partition will be used to store extra files.</li>
+</ul>
+
+<h4>Creating the Bootloader</h4>
+
+<p>With the flash drive partitioned and ready to go, we can move on to creating the bootloader. Download <a href="http://unetbootin.sourceforge.net/">UNetbootin</a> for your operating system. This program will allow you to create a bootable USB flash drive from the ISO you downloaded earlier. Once you&#39;ve got it downloaded, start it up.</p>
+
+<div class="center">
+	<div class="image">
+		<a href="/images/uploads/unetbootin-screenshot.jpg" title="Screenshot of UNetbootin">
+			<img src="/images/uploads/unetbootin-screenshot.jpg" alt="">
+		</a>
+		<p class="caption"></p>
+	</div>
+</div>
+
+<p>Select <i>&quot;Diskimage&quot;</i> and browse to select the ISO file you downloaded previously. Then select the <i>&quot;Ubuntu&quot;</i> partition on the USB flash drive to which the bootloader will be installed. Now, where it says <i>&quot;Space used to preserve files across reboots (Ubuntu only)&quot;</i>, enter <strong>512 MB</strong>. This will allow changes to persist between uses of the bootable USB drive. Finally, click the <i>&quot;OK&quot;</i> button to begin the creation of your bootloader. This may take a few minutes.</p>
+
+<p>If you have trouble with this step, you can try <a href="http://www.howtogeek.com/howto/13379/create-a-bootable-ubuntu-9.10-usb-flash-drive/">here</a> for additional information about creating bootable USB flash drives.</p>
+
+<p>Before moving on to the next step, you may want to save this tutorial as an HTML document to the <i>&quot;Storage&quot;</i> partition on the flash drive. This will allow you to view it offline from within the Ubuntu OS later.</p>
+
+
+<h3>Step 4: Booting into Ubuntu</h3>
+
+<p>Before your machine can boot up using the bootloader installed on the flash drive, you&#39;ll need to adjust your machine&#39;s boot order in its BIOS. To do this, first restart your computer, but before it boots into your regular, installed operating system, you&#39;ll need to open the BIOS menu. Usually this requires you to press the <i>F2</i> key early on in the boot process. The key to start the BIOS menu may be different for your hardware. Watch carefully when your computer is booting up for instructions for how to get to the BIOS menu.</p>
+
+<p>Once you&#39;ve reached the BIOS, navigate to the <i>&quot;Boot&quot;</i> or <i>&quot;Boot Order&quot;</i> sub-menu. Then move the USB media up in the boot order until it is above your primary storage device (which is usually a HDD or SSD). Now you can <i>&quot;Save &amp; Exit&quot;</i> from the BIOS.</p>
+
+<p>With the flash drive still plugged into one of your machine&#39;s USB ports, your machine should now automatically boot into the Ubuntu OS boot screen. If it didn&#39;t, you&#39;ll want to look back over the last couple steps to verify you did everything correctly.</p>
+
+<p>Select the <i>&quot;Try Ubuntu&quot;</i> option and hit enter. It might take a minute or two to finish starting. Once you&#39;re at the Ubuntu desktop, you can move on to the next step.</p>
+
+<div class="center">
+	<div class="image">
+		<a href="/images/uploads/ubuntu-desktop-screenshot.jpg" title="Screenshot of Ubuntu desktop">
+			<img src="/images/uploads/ubuntu-desktop-screenshot.jpg" alt="">
+		</a>
+		<p class="caption"></p>
+	</div>
+</div>
+
+
+<h3>Step 5: Install KeePassX Password Manager</h3>
+
+<p>Later in this tutorial you will need a secure way to store sensitive information such as passwords. A great way to secure your passwords is to use a password manager like <a href="https://www.keepassx.org/">KeePassX</a>. To install it we&#39;re going to need to use the Ubuntu terminal program. You can find the terminal program via the Unity Dashboard by clicking on the Ubuntu logo in the upper left corner of the screen. Then type &quot;terminal&quot; into the search box. Once you see the terminal program icon, left-click it to open the terminal:</p>
+
+<div class="center">
+	<div class="image">
+		<a href="/images/uploads/unity-search-for-terminal-screenshot.jpg" title="Screenshot of using Unity&#39;s search box to find the terminal program">
+			<img src="/images/uploads/unity-search-for-terminal-screenshot.jpg" alt="">
+		</a>
+		<p class="caption"></p>
+	</div>
+</div>
+
+<p>With the terminal window open, enter the following commands:</p>
+<pre class="code bash">
+sudo add-apt-repository universe
+sudo apt-get update
+</pre>
+<p>This will allow you to install packages and programs that are maintained by the open source developer community.</p>
+
+<p>Now you can install KeePassX. Enter the following command in the terminal window:</p>
+<pre class="code bash">
+sudo apt-get install keepassx
+</pre>
+
+<p>Yup, it&#39;s that easy!</p>
+
+
+<h3>Step 6: Install Electrum</h3>
+
+<p>To install Electrum, we&#39;re first going to need to install its dependencies. Enter the following in the terminal window:</p>
+<pre class="code bash">
+sudo apt-get install python-qt4 python-pip python-slowaes
+</pre>
+
+<p>Now you should be able to install Electrum by entering the following in the terminal window:</p>
+<pre class="code bash">
+sudo pip install https://download.electrum.org/Electrum-1.9.8.tar.gz#md5=e3918fec0254267f08e41a1fb8691382
+</pre>
+<p>The above command was correct as of the time this article was written. You may want to check the <a href="https://electrum.org/download.html">Electrum download page</a> to be sure you&#39;re installing the latest stable version of Electrum.</p>
+
+<p>Once you&#39;ve finished installing Electrum, move on to the next step.</p>
+
+
+<h3>Step 7: Disconnect Your Machine from the Internet</h3>
+
+<p>Un-plug your ethernet cable, if there is one.</p>
+
+<p>You&#39;ll also want to disable your wireless adapter, if you have one. To do this, you&#39;ll need to open the BIOS menu again. Once you&#39;re in the BIOS menu, navigate through the different sub-menus until you find a reference to your wireless adapter. Disable the wireless adapter. <i>&quot;Save &amp; Exit&quot;</i> from the BIOS.</p></p>
+
+
+<h3>Step 8: Boot into Ubuntu Again</h3>
+
+<p>Now you&#39;ll want to  boot back into the Ubuntu OS on the flash drive. Once Ubuntu has started, verify that your machine is in fact disconnected from the internet. Look in the upper right corner for the network icon. Any active wired/wireless network connections will show up there.</p>
+
+<div class="center">
+	<div class="image">
+		<a href="/images/uploads/ubuntu-no-networking-screenshot.jpg" title="Screenshot of Ubuntu without networking">
+			<img src="/images/uploads/ubuntu-no-networking-screenshot.jpg" alt="">
+		</a>
+		<p class="caption"></p>
+	</div>
+</div>
+
+
+<h3>Step 9: Time to Create Your Wallet</h3>
+
+<p>Open up KeePassX. Start a <i>&quot;New Database&quot;</i>. You will be prompted to enter a <i>&quot;Master Password&quot;</i>. A strong password should consist of alphanumeric characters as well as some non-alphanumeric characters, and it should be at least 20 characters long. This password should be unique. Do <strong>not</strong> use this password for anything else! Write the master password down on a piece of paper and store it some place safe. Do <strong>not</strong> save it unencrypted to the flash drive or to any electronic device.</p>
+
+<p>Save the KeePassX database to the <i>&quot;Storage&quot;</i> partition on the flash drive. It is safe to do this, because the file is encrypted with the master password. Now that the password database is setup, you can start saving important things in it. KeePassX allows you to create groups and sub-groups to help organize your passwords. Feel free to organize your password database however you like.</p>
+
+<div class="center">
+	<div class="image">
+		<a href="/images/uploads/keepassx-electrum-screenshot.jpg" title="Screenshot of KeePassX">
+			<img src="/images/uploads/keepassx-electrum-screenshot.jpg" alt="">
+		</a>
+		<p class="caption"></p>
+	</div>
+</div>
+
+<p>Leave KeePassX open, you&#39;re going to need it in a bit.</p>
+
+<p>Start Electrum. The first time you start Electrum, you will be presented with a few options:</p>
+
+<div class="center">
+	<div class="image">
+		<a href="/images/uploads/electrum-first-start-screenshot.jpg" title="Screenshot of the first time starting Electrum">
+			<img src="/images/uploads/electrum-first-start-screenshot.jpg" alt="">
+		</a>
+		<p class="caption"></p>
+	</div>
+</div>
+
+<p>Select the option to <i>&quot;Create new wallet&quot;</i> and click the <i>&quot;Next&quot;</i> button. On the next screen, you will be presented with your new wallet&#39;s <i>&quot;seed&quot;</i>:</p>
+
+<div class="center">
+	<div class="image">
+		<a href="/images/uploads/electrum-seed-screenshot.jpg" title="Screenshot of seed page in Electrum">
+			<img src="/images/uploads/electrum-seed-screenshot.jpg" alt="">
+		</a>
+		<p class="caption"></p>
+	</div>
+</div>
+
+<p>Highlight and copy the seed. Navigate back to KeePassx. Save the seed as a new entry. Give it a useful name, so you know what it is. Don&#39;t forget to save the password database after each change you make. Once you&#39;re done, you can go ahead and hit the <i>&quot;Next&quot;</i> button in Electrum. On the next screen, enter the seed again to confirm that you saved it properly.</p>
+
+<p>Now you will be prompted to enter a password. This password will be used to encrypt the wallet. This time, try using KeePassX&#39;s password generator to create a really strong password. A password with 128 characters should do nicely. And again, don&#39;t forget to save the KeePassX password database.</p>
+
+<div class="center">
+	<div class="image">
+		<a href="/images/uploads/electrum-enter-password-screenshot.jpg" title="Screenshot of password page in Electrum">
+			<img src="/images/uploads/electrum-enter-password-screenshot.jpg" alt="">
+		</a>
+		<p class="caption"></p>
+	</div>
+</div>
+
+<p>Finally, save the wallet to the <i>&quot;Storage&quot;</i> partition on the flash drive; preferably next to the KeePassX password database. It may be a good idea to create multiple backup copies of both the password database as well as the wallet file; though you don&#39;t necessarily have to backup the wallet file because you can always restore the wallet from the wallet&#39;s seed and password.</p>
+
+
+<h3>Clean Up</h3>
+
+<p>Shut down your machine and make sure that it is completely powered off. If it&#39;s a laptop, take the battery out. Leave the machine sitting like this for at least a minute.</p>
+
+<p>Now you should be able to re-enable your wireless adapter and/or plug the ethernet cable back in, to allow your machine to connect to the internet once again. To allow your machine to boot back into your regular OS, you can either detach any/all USB flash drives from its USB ports or you can re-adjust the boot order in your machine's BIOS to have the USB flash drive lower in the boot order than your HDD/SSD. Anytime you wish to use the bootable Ubuntu USB drive, though you&#39;ll have to update your machine&#39;s boot order to allow it. A bit of a pain, but it works.</p>
+
+<p>Congratulations! After all that, you now have a safe and secure Electrum wallet that you can use by booting into the Ubuntu OS that lives on the flash drive. And you can rest easy knowing that your bitcoins will be safe and happy from now on.</p>
