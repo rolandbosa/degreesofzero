@@ -24,31 +24,21 @@
 
 		createjs.Sound.alternateExtensions = this.options.alternateExtensions
 
-		var soundsToPreload = [], soundsToPreloadObj = {}
-
-		for (var i in this.options.sounds)
-		{
-			var sound = this.options.sounds[i]
-
-			if (!soundsToPreloadObj[ sound.src ])
-			{
-				soundsToPreload.push( sound )
-				soundsToPreloadObj[ sound.src ] = true
-			}
-		}
-
 		createjs.Sound.addEventListener('fileload', function(e) {
 
 			// An audio file was loaded.
 
 		})
 
-		for (var i in soundsToPreload)
+		for (var i in this.options.sounds)
 		{
-			var sound = soundsToPreload[i]
-			var fullFilePath = this.options.basePath + sound.fileName
+			var sound = this.options.sounds[i]
 
-			createjs.Sound.registerSound(fullFilePath, sound.id, this.options.basePath)
+			createjs.Sound.registerSound({
+				src: this.options.basePath + sound.fileName,
+				id: sound.id,
+				basePath: this.options.basePath
+			})
 		}
 
 	}
@@ -123,7 +113,6 @@
 
 <p>And now, all that is left to be done is listen to the button-click events and play some sounds:</p>
 <pre class="code js">
-
 	var button1 = document.getElementById('play-sound-button-1'),
 		button2 = document.getElementById('play-sound-button-2'),
 		button3 = document.getElementById('play-sound-button-3')
